@@ -1,0 +1,651 @@
+.\" Process this file with
+.\" groff -man -Tascii serc.7
+.\"
+.TH LIBSERC 7 2014.11.01 "" "SoftSprocket libserc"
+.SH NAME
+array_to_auto_string
+array_to_set
+char_ptr
+create_array
+create_id_tuple
+create_literal_value
+create_map
+create_sequence
+delete_document
+delete_id_tuple
+delete_literal_value
+delete_storage_unit
+document_to_auto_string
+double_ptr
+id_tuple_to_auto_string
+int_ptr
+literal_to_auto_string
+map_to_auto_string
+parseable_buffer_from_string
+serc_document_to_auto_string
+serc_parse_buffer
+serc_read_file
+set_to_auto_string
+storage_unit_named_float
+storage_unit_named_integer
+storage_unit_named_char
+storage_unit_named_string
+storage_unit_named_heredoc
+storage_unit_named_array
+storage_unit_named_sequence
+storage_unit_named_set
+storage_unit_named_map
+storage_unit_ptr
+str_ptr
+str_return_value
+  \- library for processing Serc data serialization language 
+.SH SYNOPSIS
+.nf
+.B #include <softsprocket/serc.h>
+.B #include <softsprocket/container.h>
+.sp
+.B char* array_to_auto_string (auto_array* aa, auto_string* str);
+.br
+.B set* array_to_set (auto_array* aa);
+.br
+.B char* char_ptr (char value);
+.br
+.B auto_array* create_array (void* value);
+.br
+.B id_tuple* create_id_tuple (char* id, void* data, id_tuple_type type);
+.br
+.B literal_value* create_literal_value (literal_value_type type, void* data);
+.br
+.B hash_table* create_map (char* key, storage_unit* value);
+.br
+.B auto_array* create_sequence (hash_table* value);
+.br
+.B void delete_document (void* v);
+.br
+.B void delete_id_tuple (void* v);
+.br
+.B void delete_literal_value (void* v);
+.br
+.B void delete_storage_unit (void* v);
+.br
+.B char* document_to_auto_string (hash_table* document, auto_string* str);
+.br
+.B long double* double_ptr (long double value);
+.br
+.B char* id_tuple_to_auto_string (id_tuple* it, auto_string* str);
+.br
+.B long int* int_ptr (long int value);
+.br
+.B char* literal_to_auto_string (literal_value* lit, auto_string* str);
+.br
+.B char* map_to_auto_string (hash_table* ht, auto_string* str);
+.br
+.B char* parseable_buffer_from_string (char* str, size_t* buffer_size);
+.br
+.B auto_string* serc_document_to_auto_string (hash_table* document);
+.br
+.B hash_table* serc_parse_buffer (char* buffer, size_t buffer_size);
+.br
+.B char* serc_read_file (char* fname, size_t* buffer_size);
+.br
+.B char* set_to_auto_string (set* s, auto_string* str);
+.br
+.B storage_unit* storage_unit_named_float (long double value, char* name);
+.br
+.B storage_unit* storage_unit_named_integer (long int value, char* name);
+.br
+.B storage_unit* storage_unit_ptr (stored_type type, void* value);
+.br
+.B char* str_ptr (char* value);
+.br
+.B char* str_return_value (char* str);
+.fi
+.sp
+Link with \fI\-lserc\fP \fI\-lsscont\fP.
+.sp
+.SH DESCRIPTION
+Libserc is the reference library for the Serc data serialization language. Its functions
+allow the programmer to parse or serialize C data types. For information on Serc see http://www.softsprocket.com/
+.br
+.sp
+.nf
+
+The enumerations and types used by libserc:
+
+typedef enum {
+        LV_STRING,
+        LV_INTEGER,
+        LV_FLOAT,
+        LV_HEREDOC,
+        LV_CHARACTER,
+        LV_ARRAY
+} literal_value_type;
+
+typedef struct {
+        literal_value_type type;
+        void* value;
+} literal_value;
+
+typedef enum {
+        TT_STRING,
+        TT_HEREDOC,
+        TT_INTEGER,
+        TT_FLOAT,
+        TT_CHARACTER,
+        TT_ARRAY,
+        TT_SET,
+        TT_SEQUENCE,
+        TT_MAP
+} id_tuple_type;
+
+typedef struct {
+        id_tuple_type type;
+        char* id;
+        void* data;
+} id_tuple;
+
+typedef enum {
+        ST_ID_TUPLE,
+        ST_LITERAL_VALUE,
+        ST_SUBDOC,
+        ST_SET
+} stored_type;
+
+typedef struct {
+        stored_type type;
+        union {
+                id_tuple* tuple;
+                literal_value* literal;
+                hash_table* map;
+                set* s;
+        };
+} storage_unit;
+
+.fi
+.br
+.sp
+char* array_to_auto_string (auto_array* aa, auto_string* str);
+.br
+.in +4n
+converts a Serc Array, stored as an auto_array, to an auto_string.
+auto_string is from libsscont.
+.br
+aa - the auto_array to convert
+.br
+str - a pointer to the auto_string that will contain the converted array
+.br
+returns - a pointer to the nul terminated buf element of the auto_string or NULL in the event of an error
+.br
+.in
+.sp
+set* array_to_set (auto_array* aa);
+.br
+.in +4n
+creates a set on the heap from the data of an auto_array of storage_units.
+and deletes the auto_array. A Serc Set is represented by a set.
+set is from libsscont
+.br
+aa - an auto_array of storage_unit pointers
+.br
+returns - a pointer to a set or NULL in the event of an error
+.br
+.in
+.sp
+char* char_ptr (char value);
+.br
+.in +4n
+ allocates a char on the heap and assigns a value to it.
+.br
+ value - the value to assign 
+.br
+ returns -  a pointer to a char or NULL in the event of an error
+.br
+.in
+.sp
+auto_array* create_array (void* value);
+.br
+.in +4n
+creates an auto_array on the heap and adds a value to it. A Serc Array or Set can be
+represented by an auto_array. In both cases the object stored should be a storage_unit.
+auto_array is from libsscont
+.br
+value - a pointer to a value to store or NULL in the event of an error
+.br
+a - pointer to an auto_array
+.br
+.in
+.sp
+id_tuple* create_id_tuple (char* id, void* data, id_tuple_type type);
+.br
+.in +4n
+creates a id_tuple object on the heap.
+.br
+id - the name of the tuple
+.br
+data - a pointer to the value of the tuple 
+.br
+type - the type of the object
+.br
+returns - a pointer to the id_tuple or NULL in the event of an error
+.br
+.in
+.sp
+literal_value* create_literal_value (literal_value_type type, void* data);
+.br
+.in +4n
+creates a literal_value object on the heap.
+.br
+type - the type of the object
+.br
+data - a pointer to the value of the literal
+.br
+returns - a pointer to the literal_value or NULL in the event of an error
+.br
+.in
+.sp
+hash_table* create_map (char* key, storage_unit* value);
+.br
+.in +4n
+creates a hash_table on the heap and stores a value in it.
+It is expected that the storage_unit contains an id_tuple
+and its namewill be the key.
+hash_table is from libsscont
+.br
+key - the key to store value under
+.br
+value - the value to be stored
+.br
+returns -  a pointer to a hash_table or NULL in the event of an error
+.br
+.in
+.sp
+auto_array* create_sequence (hash_table* value);
+.br
+.in +4n
+creates an auto_array on the heap and adds a hash_table pointer to it.
+A Serc sequence is reprsented by an auto_array. The hash_table represents
+a Serc document or subdocument.
+auto_array is from libsscont
+.br
+value - a hash_table to store
+.br
+returns - a pointer to an auto_array or NULL in the event of an error
+.br
+.in
+.sp
+void delete_document (void* v);
+.br
+.in +4n
+free the memory from a Serc document (hash_table of storage_unit types).
+Parameter is a void* to match libsscont hash_table_delete function pointer specification
+but a hash_table* is expcted.
+.br
+v - the document to free
+.br
+.in
+.sp
+void delete_id_tuple (void* v);
+.br
+.in +4n
+free the memory from a Serc id_tuple. 
+Parameter is void* for use as function pointer to libsscont delete functions
+but an id_tuple* is the expected type.
+.br
+v - the id_tuple to free
+.br
+.in
+.sp
+void delete_literal_value (void* v);
+.br
+.in +4n
+free the memory from a Serc literal_value.
+Parameter is void* for use as function pointer to libsscont delete functions
+but a literal_value* is the expected type.
+.br
+v - the storage_unit to free
+.br
+.in
+.sp
+void delete_storage_unit (void* v);
+.br
+.in +4n
+free the memory from a Serc storage_unit.
+Parameter is void* for use as function pointer to libsscont delete functions
+but a storage_unit* is the expected type.
+.br
+v - the storage_unit to free
+.br
+.in
+.sp
+char* document_to_auto_string (hash_table* document, auto_string* str);
+.br
+.in +4n
+ converts a serc document stored as a hash_table into an auto_string.
+ hash_table and auto_string are from libsscont
+.br
+ document - a hash_table containing the serc document elements
+.br
+ str - a pointer to an auto_str that will contain the converted document
+.br
+ returns - a pointer to the nul terminated buf element of the auto_string or NULL in the event of an error
+.br
+.in
+.sp
+long double* double_ptr (long double value);
+.br
+.in +4n
+allocates a long double on the heap and assigns a value to it.
+.br
+value - the value to assign 
+.br
+returns - a pointer to a long double or NULL in the event of an error
+.br
+.in
+.sp
+char* id_tuple_to_auto_string (id_tuple* it, auto_string* str);
+.br
+.in +4n
+converts a Serc id_tuple to an auto_string.
+.br
+it - the id_tuple to convert
+.br
+str - a pointer to the auto_string that will contain the converted id_tuple
+.br
+returns - a pointer to the nul terminated buf element of the auto_string or NULL in the event of an error
+.br
+.in
+.sp
+long int* int_ptr (long int value);
+.br
+.in +4n
+allocates a long int on the heap and assigns a value to it.
+.br
+value - the value to assign 
+.br
+returns - a pointer to a long int or NULL in the event of an error
+.br
+.in
+.sp
+char* literal_to_auto_string (literal_value* lit, auto_string* str);
+.br
+.in +4n
+converts a Serc literal_value to an auto_string.
+.br
+lit - the literal_value to convert
+.br
+str - a pointer to the auto_string that will contain the converted literal_value
+.br
+returns - a pointer to the nul terminated buf element of the auto_string or NULL in the event of an error
+.br
+.in
+.sp
+char* map_to_auto_string (hash_table* ht, auto_string* str);
+.br
+.in +4n
+converts a hash_table representing a Serc map to an auto_string.
+.br
+ht - the hash_table to convert
+.br
+str - a pointer to the auto_string that will contain the converted map 
+.br
+returns - a pointer to the nul terminated buf element of the auto_string or NULL in the event of an error
+.br
+.in
+.sp
+char* parseable_buffer_from_string (char* str, size_t* buffer_size);
+.br
+.in +4n
+convert a nul terminated c string into a double terminated parse buffer.
+Makes a copy of the string
+.br
+str - a c string containing the Serc data
+.br
+buffer_size - an int pointer for the return buffer size
+.br
+returns - the parseable buffer or NULL in the event of an error
+.br
+.in
+.sp
+auto_string* serc_document_to_auto_string (hash_table* document);
+.br
+.in +4n
+convenience function - creates an auto_string and calls document_to_auto_string.
+auto_string and hash_table are from libsscont
+.br
+document - the Serc document stored as a hash_table
+.br
+returns - a pointer to an auto_string containing the document or NULL in the eventof an error
+.br
+.in
+.sp
+hash_table* serc_parse_buffer (char* buffer, size_t buffer_size);
+.br
+.in +4n
+parses a Serc document into a form useable by a C program.
+The buffer must terminated with two nul bytes.
+hash_table is from libsscont
+.br
+buffer -  the string to parse
+.br
+buffer_size - the size of the buffer
+.br
+returns - a pointer to hash_table representing the Serc document or NULL in the event of an error
+.br
+.in
+.sp
+char* serc_read_file (char* fname, size_t* buffer_size);
+.br
+.in +4n
+reads a file and converts it to a buffer suitable for Serc parse buffer
+.br
+fname - the path of the file to read
+.br
+point - to an int which will be populated with the returned buffer size
+.br
+returns - buffer containing the Serc document to be parsed or NULL in the eventof an error
+.br
+.in
+.sp
+char* set_to_auto_string (set* s, auto_string* str);
+.br
+.in +4n
+converts a Serc set, stored as an libsscont set, to an auto_string.
+.br
+s - the set to convert
+.br
+str - a pointer to the auto_string that will contain the converted set
+.br
+returns - a pointer to the nul terminated buf element of the auto_string or NULL in the event of an error
+.br
+.in
+.sp
+storage_unit* storage_unit_named_float (long double value, char* name);
+.br
+.in +4n
+creates a storage_unit of type ST_ID_TUPLE that contains an id_tuple* of
+type TT_FLOAT. A convenience function that allocates the memory required
+for the id, name and the tuple and makes the appropriate assignments.
+A copy is made of the string name.
+.br
+value - the value to assign the id_tuple
+.br
+name - the name to assign the tuple
+.br
+returns - a storage_unit* or NULL if an error occurs
+.br
+.in
+.sp
+storage_unit* storage_unit_named_integer (long int value, char* name);
+.br
+.in +4n
+creates a storage_unit of type ST_ID_TUPLE that contains an id_tuple* of
+type TT_INTEGER. A convenience function that allocates the memory required
+for the id, name and the tuple and makes the appropriate assignments.
+A copy is made of the string name.
+.br
+value - the value to assign the id_tuple
+.br
+name - the name to assign the tuple
+.br
+returns - a storage_unit* or NULL if an error occurs
+.br
+.in
+.sp
+storage_unit* storage_unit_named_char (char value, char* name);
+.br
+.in +4n
+creates a storage_unit of type ST_ID_TUPLE that contains an id_tuple* of
+type TT_CHARACTER. A convenience function that allocates the memory required
+for the id, name and the tuple and makes the appropriate assignments.
+A copy is made of the string name.
+.br
+value - the value to assign the id_tuple
+.br
+name - the name to assign the tuple
+.br
+returns - a storage_unit* or NULL if an error occurs
+.br
+.in
+.sp
+storage_unit* storage_unit_named_string (char* value, char* name);
+.br
+.in +4n
+creates a storage_unit of type ST_ID_TUPLE that contains an id_tuple* of
+type TT_STRING. A convenience function that allocates the memory required
+for the id, and the tuple and makes the appropriate assignments.
+A copy is made of the string value. A copy is made of the string name.
+.br
+value - the value to assign the id_tuple
+.br
+name - the name to assign the tuple
+.br
+returns - a storage_unit* or NULL if an error occurs
+.br
+.in
+.sp
+storage_unit* storage_unit_named_heredoc (char* value, char* name);
+.br
+.in +4n
+creates a storage_unit of type ST_ID_TUPLE that contains an id_tuple* of
+type TT_HEREDOC. A convenience function that allocates the memory required
+for the id, name and the tuple and makes the appropriate assignments.
+The char* value should be on the heap (no copy is made). A copy is made of the string name.
+.br
+value - the value to assign the id_tuple
+.br
+name - the name to assign the tuple
+.br
+returns - a storage_unit* or NULL if an error occurs
+.br
+.in
+.sp
+storage_unit* storage_unit_named_array (auto_array* value, char* name);
+.br
+.in +4n
+creates a storage_unit of type ST_ID_TUPLE that contains an id_tuple* of
+type TT_ARRAY. A convenience function that allocates the memory required
+for the id, name and the tuple and makes the appropriate assignments.
+The auto_array* value should be on the heap (no copy is made). A copy is made of the string name.
+.br
+value - the value to assign the id_tuple
+.br
+name - the name to assign the tuple
+.br
+returns - a storage_unit* or NULL if an error occurs
+.br
+.in
+.sp
+storage_unit* storage_unit_named_set (set* value, char* name);
+.br
+.in +4n
+creates a storage_unit of type ST_ID_TUPLE that contains an id_tuple* of
+type TT_SET. A convenience function that allocates the memory required
+for the id, name and the tuple and makes the appropriate assignments.
+The set* value should be on the heap (no copy is made). A copy is made of the string name.
+.br
+value - the value to assign the id_tuple
+.br
+name - the name to assign the tuple
+.br
+returns - a storage_unit* or NULL if an error occurs
+.br
+.in
+.sp
+storage_unit* storage_unit_named_sequence (auto_array* value, char* name);
+.br
+.in +4n
+creates a storage_unit of type ST_ID_TUPLE that contains an id_tuple* of
+type TT_SEQUENCE. A convenience function that allocates the memory required
+for the id, name and the tuple and makes the appropriate assignments.
+The auto_array* value should be on the heap (no copy is made). A copy is made of the string name.
+.br
+value - the value to assign the id_tuple
+.br
+name - the name to assign the tuple
+.br
+returns - a storage_unit* or NULL if an error occurs
+.br
+.in
+.sp
+storage_unit* storage_unit_named_map (hash_table* value, char* name);
+.br
+.in +4n
+creates a storage_unit of type ST_ID_TUPLE that contains an id_tuple* of
+type TT_MAP. A convenience function that allocates the memory required
+for the id, name and the tuple and makes the appropriate assignments.
+The hash_table* value should be on the heap (no copy is made). A copy is made of the string name.
+.br
+value - the value to assign the id_tuple
+.br
+name - the name to assign the tuple
+.br
+returns - a storage_unit* or NULL if an error occurs
+.br
+.in
+.sp
+storage_unit* storage_unit_ptr (stored_type type, void* value);
+.br
+.in +4n
+allocates a storage_unit on the heap and assigns a value and type to it.
+.br
+type - the type to assign
+.br
+value - the value to assign 
+.br
+returns - a pointer to a storage_unit or NULL in the event of an error
+.br
+.in
+.sp
+char* str_ptr (char* value);
+.br
+.in +4n
+allocates a char* on the heap and coppies a value to it.
+.br
+value - the value to assign 
+.br
+returns - a char* or NULL in the event of an error
+.br
+.in
+.sp
+char* str_return_value (char* str);
+.br
+.in +4n
+copies a string removing quotations from the front and back if they exist.
+.br
+str - the string to copy or NULL in the event of an error
+.br
+returns - a string
+.br
+.in
+.in
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+Greg Martin <greg@softsprocket.com>
+.SH "SEE ALSO"
+.BR hash_table (3),
+.BR set (3),
+.BR auto_string (3),
+.BR auto_array (3)
+
+

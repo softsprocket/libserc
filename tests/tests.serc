@@ -1,0 +1,43 @@
+
+
+{
+
+	/* 
+		Off and running 
+	*/
+
+	Sequence vals = {
+		{
+			Set inums = ((1,2,3,4),(2,3,4,5))
+			Set fnums = (1.2, 3.45)
+		},
+		{
+			String heredoc = 
+```
+	Space will be 'preserved'
+	and "quotes" are ok
+```
+		},
+		{
+			Map home = {
+				Address: "localhost",
+				Port: 80,
+				Message: { 
+					String str = "Hello, Localhost!"
+					Integer i = 123
+				}		
+			}
+			Map away = {
+				Address: "google.ca",
+				Port:80
+			}
+		}
+	}
+
+	String str = "Hello, World!"
+	Float fl = 1.23e6
+	Array ar = [[1, 2, 3, 4],['a', 'b', 'c', 'd']]
+	Integer i = 956
+	Character c = 'c'
+}
+
