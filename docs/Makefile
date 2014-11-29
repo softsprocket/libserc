@@ -13,7 +13,7 @@ install-docs:
 	install -d  $(DESTDIR)/usr/share/man/man3
 	install -d $(DESTDIR)/usr/share/man/man7
 	cd man/man3/ && install -c -m 0644 $(MANPAGES) $(DESTDIR)/usr/share/man/man3/
-	cd man/man7/ && install -c -m 0644 $(MANPAGES) $(DESTDIR)/usr/share/man/man7/
+	cd man/man7/ && install -c -m 0644 serc.7 $(DESTDIR)/usr/share/man/man7/
 	install -d $(DESTDIR)/usr/share/doc/softsprocket/libserc/html
 	cp -r html/* $(DESTDIR)/usr/share/doc/softsprocket/libserc/html/
 	
