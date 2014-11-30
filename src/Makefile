@@ -1,6 +1,6 @@
 
 additional_flags = -std=c11 -I../include -fpic
-LIBS = -lfl
+LIBS = -lfl -lsscont
 
 all: lib$(package).$(version).so
 
@@ -38,12 +38,14 @@ install:
 	install -d  $(DESTDIR)$(prefix)/include/softsprocket
 	install -m 0644 ../lib/lib$(package).$(version).so  $(DESTDIR)$(prefix)/lib/softsprocket
 	install -m 0644 ../include/serc.h $(DESTDIR)$(prefix)/include/softsprocket
+	-ln -s $(DESTDIR)$(prefix)/lib/softsprocket/lib$(package).$(version).so $(DESTDIR)$(prefix)/lib$(package).so
 	
 uninstall:
 	-rm  $(DESTDIR)$(prefix)/lib/softsprocket/lib$(package).$(version).so
 	-rm -d  $(DESTDIR)$(prefix)/lib/softsprocket
 	-rm $(DESTDIR)$(prefix)/include/softsprocket/serc.h
 	-rm -d $(DESTDIR)$(prefix)/include/softsprocket
+	-rm $(DESTDIR)$(prefix)/lib$(package).so
 	
 
 .PHONY: all clean install uninstall
